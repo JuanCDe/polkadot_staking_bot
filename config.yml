@@ -1,0 +1,3 @@
+in_prod: False
+TGTOKEN_prod: "5000000005:Axxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk"
+TGTOKEN_dev: "5000000006:AyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyY"
