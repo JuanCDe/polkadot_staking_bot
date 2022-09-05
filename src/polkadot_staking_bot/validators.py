@@ -1,8 +1,8 @@
-from utils import file_status, short_addr
 import pickle
 from os.path import exists
 import logging
 
+from utils import file_status, short_addr
 
 def get_all_validators_commissions(substrate, era_index):
     """
@@ -11,7 +11,7 @@ def get_all_validators_commissions(substrate, era_index):
     :param substrate: Conexión al RPC
     :return: Diccionario con estructura {val_address: {"era_info": {era: {"comission": float}}}}
     """
-    run, all_validators = file_status(file='./src/data/all_validators_comm.pkl')
+    run, all_validators = file_status(file='./data/all_validators_comm.pkl')
 
     if not run and all_validators:
         # Si el archivo es reciente (run == False) pero no tiene la era, se cambia a run = True
@@ -75,7 +75,7 @@ def get_validators_info(substrate, nominators, era_index):
             all_validators = pickle.load(input_data)
         saved_eras = list(list(all_validators.values())[0]["era_info"].keys())
         if era_index in saved_eras:
-            logger.info(f'> Loading eras saved file...')
+            # logger.info(f'> Loading eras saved file...')
             run = False
         else:
             logger.info(f'> Current era {era_index} not saved...')
