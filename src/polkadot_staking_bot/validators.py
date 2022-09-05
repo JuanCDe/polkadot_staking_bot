@@ -75,10 +75,9 @@ def get_validators_info(substrate, nominators, era_index):
             all_validators = pickle.load(input_data)
         saved_eras = list(list(all_validators.values())[0]["era_info"].keys())
         if era_index in saved_eras:
-            # logger.info(f'> Loading eras saved file...')
             run = False
         else:
-            logger.info(f'> Current era {era_index} not saved...')
+            logger.info(f'> Era {era_index} not saved...')
             new_era = True
             run = True
     else:
