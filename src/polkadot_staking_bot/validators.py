@@ -11,7 +11,7 @@ def get_all_validators_commissions(substrate, era_index):
     :param substrate: Conexión al RPC
     :return: Diccionario con estructura {val_address: {"era_info": {era: {"comission": float}}}}
     """
-    run, all_validators = file_status(file='./data/all_validators_comm.pkl')
+    run, all_validators = file_status(file='./src/data/all_validators_comm.pkl')
 
     if not run and all_validators:
         # Si el archivo es reciente (run == False) pero no tiene la era, se cambia a run = True
