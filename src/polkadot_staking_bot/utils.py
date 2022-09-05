@@ -93,9 +93,9 @@ def generate_legend():
     msg = f'/legend\n' \
           f'*ERA SECTION*\n\n' \
           f'\U0001F449: Link to the nominator address in Subscan\n\n' \
-          f'\U0001F4B0: Staking reward obtained from previous era\n\n' \
-          f'\U0001F4C5: The current era\n\n' \
-          f'\U0001F969: The amount of DOT staked for the current era\n\n' \
+          f'\U0001F969: Staked tokens for the past or current era\n\n' \
+          f'\U0001F4B0: Reward obtained from the past era and its approximate APR\n\n' \
+          f'\U0001F969: Bonded tokens for the current era\n\n' \
           f'\n\n*VALIDATOR SECTION*\n\n' \
           f'✅> Validator is the "Active" one (validating with your funds)\n\n' \
           f'🟧> Validator is "Inactive" (validating but not with your funds)\n\n' \
@@ -104,6 +104,7 @@ def generate_legend():
           f'\U0001F9FE: x.x% represents the fee from the validator. _(x.x% -> y.y%)_ would represent a fee change\n\n' \
           f'\U0001F5F3: Number of nominators nominating it / Number of nominators with it as the Active validator\n\n' \
           f'\U00002696: The validator is oversuscribed (+256 nominators have it as their Active validator)\n\n' \
+          f'"\U0001F4CA": The % of the total amount staked on the validator owned by the nominator' \
           f'❗: The nominator is (or would be) out of the top 256 of the nominating list\n\n' \
           f'\U0001F3C5: Position of the nominator in the validator list (the "would-be" position if the validator is not the Active)\n\n' \
           f'_top x.x%_: Percentage from the top (percentile)\n\n' \
