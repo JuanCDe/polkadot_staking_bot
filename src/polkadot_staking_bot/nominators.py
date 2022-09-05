@@ -69,11 +69,13 @@ def get_staking_nominator(substrate, addr):
 
 
 def get_nominator_details(substrate, nom, all_nominators, validators_info, era_index):
-    staked_by_nominator = get_staking_nominator(substrate, nom)
+    currently_bonded = get_staking_nominator(substrate, nom)
+    currently_staking = 0
     past_reward = 0
     nominated = {}
     slashed_info = ""
-    if staked_by_nominator and nom in all_nominators:
+    perc_on_validator = 0
+    if currently_bonded and nom in all_nominators:
         validator_list = all_nominators[nom]["validators_nominated"]
         slashed_nominator_msj = nom_was_slashed(substrate, validators_info, nom)
         slashed_validator_msj = val_was_slashed(validator_list, validators_info)
@@ -93,7 +95,8 @@ def get_nominator_details(substrate, nom, all_nominators, validators_info, era_i
                     past_era_status = "no_info"
                 if past_era_status == "was_nominated":
                     # Sólo si estaba dentro del set de nominadores activo!
-                    prct_of_nom = staked_by_nominator/float(nominated[validator]["era_info"][past_era]["total_stake"])
+                    staked_past_era = float(nominated[validator]["era_info"][past_era]["nominators"][nom])
+                    prct_of_nom = staked_past_era/float(nominated[validator]["era_info"][past_era]["total_stake"])
                     nom_rewarded = float(nominated[validator]["era_info"][past_era]["token_rewarded"]) * float(prct_of_nom)
                     fee = 1-(float(nominated[validator]["era_info"][past_era]["commission"])/100)
                     nom_rewarded_minus_fee = nom_rewarded * fee
@@ -106,11 +109,15 @@ def get_nominator_details(substrate, nom, all_nominators, validators_info, era_i
                 if status == "Active":
                     staking_nominators = validators_info[validator]["era_info"][era_index]["nominators"]
                     status = "Nominated" if nom in staking_nominators else "Active"
+                    if status == "Nominated":
+                        currently_staking = staking_nominators[nom]
                     nominated[validator]["era_info"][era_index]["status"] = status
-                    prct_pos = get_pos_percentile(list(staking_nominators.values()), staked_by_nominator)
+                    prct_pos = get_pos_percentile(list(staking_nominators.values()), currently_staking)
                     nominated[validator]["era_info"][era_index]["nom_pos"] = prct_pos["value_pos"]
                     nominated[validator]["era_info"][era_index]["nom_percentile"] = prct_pos["percentile_rounded"]
                     nominated[validator]["era_info"][era_index]["len_nominators"] = prct_pos["len_list"]
+                    total_stake = float(nominated[validator]["era_info"][era_index]["total_stake"])
+                    perc_on_validator = currently_staking*100/total_stake
             else:
                 status = "NOT A VALIDATOR"
                 nominated.update({validator: {"era_info": {era_index: {"status": status}}}})
@@ -121,22 +128,33 @@ def get_nominator_details(substrate, nom, all_nominators, validators_info, era_i
 
     else:
         nominated = None
-    result = {"nominated": nominated, "past_reward": past_reward, "slashed": slashed_info}
+    result = {"nominated": nominated, "past_reward": past_reward, "staked_past_era": staked_past_era,
+              "currently_staking": currently_staking, "currently_bonded": currently_bonded,
+              "perc_on_validator": perc_on_validator, "slashed": slashed_info}
     return result
 
 
 def get_nominating_summary(substrate, nominator_details, era_index, nom):
     nominated = nominator_details["nominated"]
-    past_reward = nominator_details["past_reward"]
+    past_reward = round(nominator_details["past_reward"], 4)
     slashed_info = nominator_details["slashed"]
+    staked_past_era = round(nominator_details["staked_past_era"], 4)
     if nominated:
         nom_shorted = short_addr(nom)
         nom_link = f'[{nom_shorted}](https://polkadot.subscan.io/account/{nom})'
-        staked = get_staking_nominator(substrate, nom)
-        to_print = f'\U0001F449 {nom_link}\n' \
-                   f'\U0001F4B0 past era ({era_index-1}) *{past_reward} {substrate.token_symbol}*\n\n' \
-                   f'\U0001F4C5 current era *{era_index}*\n' \
-                   f'\U0001F969 {round(staked, 3)} {substrate.token_symbol}\n\n'
+        # staked = get_staking_nominator(substrate, nom)
+        currently_staking = round(nominator_details["currently_staking"], 4)
+        currently_bonded = round(nominator_details["currently_bonded"], 5)
+        perc_on_validator = round(nominator_details["perc_on_validator"], 2)
+        apr = round(nominator_details["past_reward"]*100*365/nominator_details["staked_past_era"], 2)
+        token_symbol = substrate.token_symbol
+        to_print = f'\U0001F449 {nom_link}\n\n' \
+                   f'\U0001F4C5 Past era {era_index-1}\n' \
+                   f'{" "*8}\U0001F969 {staked_past_era} {token_symbol}\n' \
+                   f'{" "*8}\U0001F4B0: *{past_reward} {token_symbol}* (~{apr}% APR)\n\n' \
+                   f'\U0001F4C5 Current era *{era_index}*\n' \
+                   f'{" "*8}\U0001F969 {currently_staking} {token_symbol}\n' \
+                   f'{" "*8}\U0001F517 {currently_bonded} {token_symbol}\n\n'
         nominated = dict(sorted(nominated.items(), key=lambda item: item[1]["era_info"][era_index]["status_order"]))
         for validator in nominated:
             identity_display = nominated[validator]["identity_info"]["display_name"]
@@ -155,15 +173,20 @@ def get_nominating_summary(substrate, nominator_details, era_index, nom):
                 total_nominators = nominated[validator]["era_info"][era_index]["total_nominators"]
                 if current_status == "Active" or current_status == "Nominated":
                     active_nominators = info_current_era["active_nominators"]
-                    # Se suma 1 si el validador no es el nominado ya que sería el supuesto de que formase parte de su lista
-                    active_nominators = active_nominators+1 if current_status == "Active" else active_nominators
+                    if current_status == "Nominated":
+                        # Se suma 1 si el validador no es el nominado ya que sería el supuesto de que formase parte de su lista
+                        active_nominators = active_nominators+1
+                        perc_on_active_val = f'{" "*8}\U0001F4CA{perc_on_validator}%\n'
+                    else:
+                        perc_on_active_val = ""
                     active_nominators_w_emoji = f'{active_nominators} \U00002696' if active_nominators > 256 else active_nominators
                     nom_percentile = info_current_era["nom_percentile"]
                     nom_position = info_current_era["nom_pos"]
                     emoji_oversubs = "" if nom_position <= 256 else f'\U00002757'
                     emoji_pos = add_emoji_position(nom_percentile)
                     nom_pos_per = f'{" "*8}\U0001F5F3{total_nominators}/{active_nominators_w_emoji}\n' \
-                                  f'{" "*8}\U0001F3C5{nom_position}º{emoji_oversubs} top {nom_percentile}% {emoji_pos}\n\n'
+                                  f'{" "*8}\U0001F3C5{nom_position}º{emoji_oversubs} top {nom_percentile}% {emoji_pos}\n' \
+                                  f'{perc_on_active_val}\n'
                 else:
                     nom_pos_per = f'{" "*8}{total_nominators}\n'
             else:
