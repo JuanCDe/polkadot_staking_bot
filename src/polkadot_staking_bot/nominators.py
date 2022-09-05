@@ -71,6 +71,7 @@ def get_staking_nominator(substrate, addr):
 def get_nominator_details(substrate, nom, all_nominators, validators_info, era_index):
     currently_bonded = get_staking_nominator(substrate, nom)
     currently_staking = 0
+    staked_past_era = 0
     past_reward = 0
     nominated = {}
     slashed_info = ""
@@ -151,7 +152,7 @@ def get_nominating_summary(substrate, nominator_details, era_index, nom):
         to_print = f'\U0001F449 {nom_link}\n\n' \
                    f'\U0001F4C5 Past era {era_index-1}\n' \
                    f'{" "*8}\U0001F969 {staked_past_era} {token_symbol}\n' \
-                   f'{" "*8}\U0001F4B0: *{past_reward} {token_symbol}* (~{apr}% APR)\n\n' \
+                   f'{" "*8}\U0001F4B0 *{past_reward} {token_symbol}* (~{apr}% APR)\n\n' \
                    f'\U0001F4C5 Current era *{era_index}*\n' \
                    f'{" "*8}\U0001F969 {currently_staking} {token_symbol}\n' \
                    f'{" "*8}\U0001F517 {currently_bonded} {token_symbol}\n\n'
