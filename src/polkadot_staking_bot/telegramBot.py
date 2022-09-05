@@ -8,6 +8,8 @@ from utils import validate_addr, generate_legend, generate_bot_disclaimer
 
 config = yaml.safe_load(open("./config.yml"))
 in_prod = config["in_prod"]
+logger = logging.getLogger("polkadot_staking_bot")
+logger.info(f'In production: {in_prod}')
 tk = config["TGTOKEN_prod"] if in_prod else config["TGTOKEN_dev"]
 
 updater = Updater(token=tk)
