@@ -7,7 +7,7 @@ import time
 
 from conn import retrieve_ss58_registry
 from init_functions import update_files, start_logging
-import telegramBot
+from telegramBot import start_bot, stop_bot
 
 
 if __name__ == "__main__":
@@ -24,10 +24,10 @@ if __name__ == "__main__":
 
     # Start listening
     try:
-        telegramBot.start_bot()
+        start_bot()
     except Exception as ex:
         logger.error(f'> 26 (init) {ex}')
-        telegramBot.stop_bot()
+        stop_bot()
         exit(1)
 
     # Keep it running and update it once everyday
@@ -41,4 +41,4 @@ if __name__ == "__main__":
                 time.sleep(60)
     except KeyboardInterrupt:
         logger.error(f'> Stopping by interruption')
-        telegramBot.stop_bot()
+        stop_bot()
