@@ -2,6 +2,7 @@ import yaml
 import logging
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, Filters
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
 from init_functions import core
 from utils import validate_addr, generate_legend, generate_bot_disclaimer
 
@@ -77,6 +78,7 @@ def info(update, context):
             try:
                 text_out = core(addr)
             except Exception as ex:
+                text_out = "An error occurred. Contact me @Juan_CDe"
                 logger.error(f'> 82: {ex}')
         elif valid_addr == "Invalid address":
             text_out = "Invalid address"
