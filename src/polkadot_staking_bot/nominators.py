@@ -73,6 +73,7 @@ def get_nominator_details(substrate, nom, all_nominators, validators_info, era_i
     currently_staking = 0
     staked_past_era = 0
     past_reward = 0
+    apr = 0
     nominated = {}
     slashed_info = ""
     perc_on_validator = 0
@@ -129,7 +130,10 @@ def get_nominator_details(substrate, nom, all_nominators, validators_info, era_i
 
     else:
         nominated = None
-    result = {"nominated": nominated, "past_reward": past_reward, "staked_past_era": staked_past_era,
+
+    if staked_past_era and past_reward:
+        apr = round(past_reward*100*365/staked_past_era, 2)
+    result = {"nominated": nominated, "past_reward": past_reward, "staked_past_era": staked_past_era, "apr": apr,
               "currently_staking": currently_staking, "currently_bonded": currently_bonded,
               "perc_on_validator": perc_on_validator, "slashed": slashed_info}
     return result
@@ -140,6 +144,7 @@ def get_nominating_summary(substrate, nominator_details, era_index, nom):
     past_reward = round(nominator_details["past_reward"], 4)
     slashed_info = nominator_details["slashed"]
     staked_past_era = round(nominator_details["staked_past_era"], 4)
+    apr = nominator_details["apr"]
     if nominated:
         nom_shorted = short_addr(nom)
         nom_link = f'[{nom_shorted}](https://polkadot.subscan.io/account/{nom})'
@@ -147,7 +152,7 @@ def get_nominating_summary(substrate, nominator_details, era_index, nom):
         currently_staking = round(nominator_details["currently_staking"], 4)
         currently_bonded = round(nominator_details["currently_bonded"], 5)
         perc_on_validator = round(nominator_details["perc_on_validator"], 2)
-        apr = round(nominator_details["past_reward"]*100*365/nominator_details["staked_past_era"], 2)
+
         token_symbol = substrate.token_symbol
         to_print = f'\U0001F449 {nom_link}\n\n' \
                    f'\U0001F4C5 Past era {era_index-1}\n' \
