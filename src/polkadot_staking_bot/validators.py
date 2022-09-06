@@ -60,7 +60,7 @@ def get_active_validators(substrate, era_index):
     return validators_staking
 
 
-def get_validators_info(substrate, nominators, era_index):
+def get_validators_info(substrate, nominators, era_index, last_era):
     """
     Obtener información sobre todos los validadores
     :param nominators:
@@ -77,7 +77,7 @@ def get_validators_info(substrate, nominators, era_index):
         if era_index in saved_eras:
             run = False
         else:
-            logger.info(f'> Era {era_index} not saved...')
+            logger.info(f'> Era {era_index}/{last_era} not saved...')
             new_era = True
             run = True
     else:
