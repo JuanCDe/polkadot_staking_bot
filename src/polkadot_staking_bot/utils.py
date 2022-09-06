@@ -95,7 +95,8 @@ def generate_legend():
           f'\U0001F449: Link to the nominator address in Subscan\n\n' \
           f'\U0001F969: Staked tokens for the past or current era\n\n' \
           f'\U0001F4B0: Reward obtained from the past era and its approximate APR\n\n' \
-          f'\U0001F969: Bonded tokens for the current era\n\n' \
+          f'\U0001F969: Staked tokens for the current era\n\n' \
+          f'\U0001F517: Bonded tokens for the current era\n\n' \
           f'\n\n*VALIDATOR SECTION*\n' \
           f'A list of validators staking with your funds and nominated validators for the current era. ' \
           f'If you changed you nominations recently, they can be more than 16 validators\n\n' \
