@@ -80,7 +80,7 @@ def info(update, context):
             try:
                 text_out = core(addr)
             except Exception as ex:
-                text_out = "An error occurred. Contact me @Juan_CDe"
+                text_out = "An error occurred. Contact me @Juan\_CDe"
                 logger.error(f'> 82: {ex}')
         elif valid_addr == "Invalid address":
             text_out = "Invalid address"
