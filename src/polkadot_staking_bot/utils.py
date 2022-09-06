@@ -30,7 +30,7 @@ def get_pos_percentile(val_list, value):
 
 
 def add_emoji_status(status):
-    if status == "Nominated":
+    if status == "Staked":
         emoji = "\U00002705"
     elif status == "Active":
         emoji = "\U0001F7E7"
@@ -96,7 +96,9 @@ def generate_legend():
           f'\U0001F969: Staked tokens for the past or current era\n\n' \
           f'\U0001F4B0: Reward obtained from the past era and its approximate APR\n\n' \
           f'\U0001F969: Bonded tokens for the current era\n\n' \
-          f'\n\n*VALIDATOR SECTION*\n\n' \
+          f'\n\n*VALIDATOR SECTION*\n' \
+          f'A list of validators staking with your funds and nominated validators for the current era. ' \
+          f'If you changed you nominations recently, they can be more than 16 validators\n\n' \
           f'✅> Validator is the "Active" one (validating with your funds)\n\n' \
           f'🟧> Validator is "Inactive" (validating but not with your funds)\n\n' \
           f'🕑> Validator not validating (out of the top 297, but want to)\n\n' \
