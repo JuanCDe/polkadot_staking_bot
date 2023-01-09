@@ -69,68 +69,76 @@ def get_staking_nominator(substrate, addr):
 
 
 def get_nominator_details(substrate, nom, all_nominators, validators_info, era_index):
-    currently_bonded = get_staking_nominator(substrate, nom)
-    currently_staking = 0
-    current_active_nom_full = {"active_noms": {}, "currently_staking": 0}
-    apr = 0
-    nominated = {}
-    slashed_info = ""
-    perc_on_validator = 0
-    if currently_bonded and nom in all_nominators:
-        validator_list = all_nominators[nom]["validators_nominated"]
-        slashed_nominator_msj = nom_was_slashed(substrate, validators_info, nom)
-        slashed_validator_msj = val_was_slashed(validator_list, validators_info)
-        slashed_info = slashed_nominator_msj + slashed_validator_msj
+    try:
+        currently_bonded = get_staking_nominator(substrate, nom)
+        currently_staking = 0
+        current_active_nom_full = {"active_noms": {}, "currently_staking": 0}
+        apr = 0
+        nominated = {}
+        slashed_info = ""
+        perc_on_validator = 0
+        result = ""
+        if currently_bonded and nom in all_nominators:
+            slashed_nominator_msj = nom_was_slashed(substrate, validators_info, nom)
 
-        # Validators the nominator is staking with this era
-        current_active_nom_full = get_active_nominated(validators_info, nom, era_index)
-        for staking_val, staked in current_active_nom_full["active_noms"].items():
-            nominated[staking_val] = validators_info.get(staking_val)
-            nominated[staking_val]["era_info"][era_index]["status"] = "Staked"
+            # Validators the nominator is staking with this era
+            current_active_nom_full = get_active_nominated(validators_info, nom, era_index)
+            for staking_val, staked in current_active_nom_full["active_noms"].items():
+                nominated[staking_val] = validators_info.get(staking_val)
+                nominated[staking_val]["era_info"][era_index]["status"] = "Staked"
 
-            staking_nominators = validators_info[staking_val]["era_info"][era_index]["nominators"]
-            prct_pos = get_pos_percentile(list(staking_nominators.values()), staked)
-            nominated[staking_val]["era_info"][era_index]["nom_pos"] = prct_pos["value_pos"]
-            nominated[staking_val]["era_info"][era_index]["nom_percentile"] = prct_pos["percentile_rounded"]
-            nominated[staking_val]["era_info"][era_index]["len_nominators"] = prct_pos["len_list"]
+                staking_nominators = validators_info[staking_val]["era_info"][era_index]["nominators"]
+                prct_pos = get_pos_percentile(list(staking_nominators.values()), staked)
+                nominated[staking_val]["era_info"][era_index]["nom_pos"] = prct_pos["value_pos"]
+                nominated[staking_val]["era_info"][era_index]["nom_percentile"] = prct_pos["percentile_rounded"]
+                nominated[staking_val]["era_info"][era_index]["len_nominators"] = prct_pos["len_list"]
 
-            total_stake_by_val = float(validators_info[staking_val]["era_info"][era_index]["total_stake"])
-            currently_staking_on_val = current_active_nom_full["active_noms"][staking_val]
-            nominated[staking_val]["era_info"][era_index]["perc_on_active_val"] = currently_staking_on_val*100/total_stake_by_val
+                total_stake_by_val = float(validators_info[staking_val]["era_info"][era_index]["total_stake"])
+                currently_staking_on_val = current_active_nom_full["active_noms"][staking_val]
+                nominated[staking_val]["era_info"][era_index]["perc_on_active_val"] = currently_staking_on_val*100/total_stake_by_val
 
-        # Validators that are currently nominated (they don't have to be the ones staking with)
-        for validator in all_nominators[nom]["validators_nominated"]:
-            if validators_info.get(validator):
-                nominated[validator] = validators_info.get(validator)
+            # Validators that are currently nominated (they don't have to be the ones staking with)
+            for validator in all_nominators[nom]["validators_nominated"]:
+                if validators_info.get(validator):
+                    nominated[validator] = validators_info.get(validator)
 
-                status = validators_info[validator]["era_info"][era_index]["status"]
-                if status == "Active":
-                    staking_nominators = validators_info[validator]["era_info"][era_index]["nominators"]
-                    nominated[validator]["era_info"][era_index]["status"] = status
-                    prct_pos = get_pos_percentile(list(staking_nominators.values()), currently_staking)
-                    nominated[validator]["era_info"][era_index]["nom_pos"] = prct_pos["value_pos"]
-                    nominated[validator]["era_info"][era_index]["nom_percentile"] = prct_pos["percentile_rounded"]
-                    nominated[validator]["era_info"][era_index]["len_nominators"] = prct_pos["len_list"]
-            else:
-                status = "NOT A VALIDATOR"
-                nominated.update({validator: {"era_info": {era_index: {"status": status}}}})
+                    status = validators_info[validator]["era_info"][era_index]["status"]
+                    if status == "Active":
+                        staking_nominators = validators_info[validator]["era_info"][era_index]["nominators"]
+                        nominated[validator]["era_info"][era_index]["status"] = status
+                        prct_pos = get_pos_percentile(list(staking_nominators.values()), currently_staking)
+                        nominated[validator]["era_info"][era_index]["nom_pos"] = prct_pos["value_pos"]
+                        nominated[validator]["era_info"][era_index]["nom_percentile"] = prct_pos["percentile_rounded"]
+                        nominated[validator]["era_info"][era_index]["len_nominators"] = prct_pos["len_list"]
 
-        for validators_in_nom in nominated:
-            nominated[validators_in_nom]["identity_info"] = get_identity_info(substrate, validators_in_nom)
-            status = validators_info[validators_in_nom]["era_info"][era_index]["status"]
-            nominated[validators_in_nom]["era_info"][era_index]["status_order"] = add_order(status)
+                        slashed_validator_msj = val_was_slashed(validator, validators_info)
+                        slashed_info = slashed_nominator_msj + slashed_validator_msj
 
-    else:
-        nominated = None
+                else:
+                    status = "NOT A VALIDATOR"
+                    nominated.update({validator: {"era_info": {era_index: {"status": status}}}})
 
-    past_era = era_index-1
-    past_reward, past_staking = get_past_staking_rewards(validators_info, nom, past_era)
-    if past_reward and past_staking:
-        apr = round(past_reward*100*365/past_staking, 2)
-    result = {"staking_with": current_active_nom_full, "nominated": nominated,
-              "past_reward": past_reward, "staked_past_era": past_staking, "apr": apr,
-              "currently_staking": current_active_nom_full["currently_staking"], "currently_bonded": currently_bonded,
-              "perc_on_validator": perc_on_validator, "slashed": slashed_info}
+            for validators_in_nom in nominated:
+                nominated[validators_in_nom]["identity_info"] = get_identity_info(substrate, validators_in_nom)
+                if validators_info.get(validators_in_nom):
+                    status = validators_info[validators_in_nom]["era_info"][era_index]["status"]
+                else:
+                    status = nominated[validators_in_nom]["era_info"][era_index]["status"]
+                nominated[validators_in_nom]["era_info"][era_index]["status_order"] = add_order(status)
+
+        else:
+            nominated = None
+
+        past_era = era_index-1
+        past_reward, past_staking = get_past_staking_rewards(validators_info, nom, past_era)
+        if past_reward and past_staking:
+            apr = round(past_reward*100*365/past_staking, 2)
+        result = {"staking_with": current_active_nom_full, "nominated": nominated,
+                  "past_reward": past_reward, "staked_past_era": past_staking, "apr": apr,
+                  "currently_staking": current_active_nom_full["currently_staking"], "currently_bonded": currently_bonded,
+                  "perc_on_validator": perc_on_validator, "slashed": slashed_info}
+    except Exception as ex:
+        print("141 ", ex)
     return result
 
 
@@ -204,12 +212,15 @@ def get_nominating_summary(substrate, nominator_details, era_index, nom):
     return f'{to_print}\n/start'
 
 
-def val_was_slashed(validator_list, validators_info):
+def val_was_slashed(validator, validators_info):
     msj = ""
-    for validator in validator_list:
-        if validators_info[validator].get("slashed"):
-            slashed_era = validators_info[validator]["slashed"]
-            msj = msj + f'\U0001F4A9 Validator {short_addr(validator)} slashed on era {slashed_era}\n'
+    print(validators_info[validator].keys())
+    if validators_info[validator].get("slashed"):
+        print("slashed!")
+        slashed_era = validators_info[validator]["slashed"]
+        print(slashed_era)
+        msj = msj + f'\U0001F4A9 Validator {short_addr(validator)} slashed on era {slashed_era}\n'
+        print(msj)
     return msj
 
 
