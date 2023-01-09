@@ -83,6 +83,7 @@ def get_nominator_details(substrate, nom, all_nominators, validators_info, era_i
 
             # Validators the nominator is staking with this era
             current_active_nom_full = get_active_nominated(validators_info, nom, era_index)
+            currently_staking = current_active_nom_full["currently_staking"]
             for staking_val, staked in current_active_nom_full["active_noms"].items():
                 nominated[staking_val] = validators_info.get(staking_val)
                 nominated[staking_val]["era_info"][era_index]["status"] = "Staked"
@@ -137,9 +138,9 @@ def get_nominator_details(substrate, nom, all_nominators, validators_info, era_i
                   "past_reward": past_reward, "staked_past_era": past_staking, "apr": apr,
                   "currently_staking": current_active_nom_full["currently_staking"], "currently_bonded": currently_bonded,
                   "perc_on_validator": perc_on_validator, "slashed": slashed_info}
+        return result
     except Exception as ex:
         print("141 ", ex)
-    return result
 
 
 def get_nominating_summary(substrate, nominator_details, era_index, nom):
@@ -214,13 +215,9 @@ def get_nominating_summary(substrate, nominator_details, era_index, nom):
 
 def val_was_slashed(validator, validators_info):
     msj = ""
-    print(validators_info[validator].keys())
     if validators_info[validator].get("slashed"):
-        print("slashed!")
         slashed_era = validators_info[validator]["slashed"]
-        print(slashed_era)
         msj = msj + f'\U0001F4A9 Validator {short_addr(validator)} slashed on era {slashed_era}\n'
-        print(msj)
     return msj
 
 
