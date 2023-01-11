@@ -71,13 +71,11 @@ def get_staking_nominator(substrate, addr):
 def get_nominator_details(substrate, nom, all_nominators, validators_info, era_index):
     try:
         currently_bonded = get_staking_nominator(substrate, nom)
-        currently_staking = 0
         current_active_nom_full = {"active_noms": {}, "currently_staking": 0}
         apr = 0
         nominated = {}
         slashed_info = ""
         perc_on_validator = 0
-        result = ""
         if currently_bonded and nom in all_nominators:
             slashed_nominator_msj = nom_was_slashed(substrate, validators_info, nom)
 
