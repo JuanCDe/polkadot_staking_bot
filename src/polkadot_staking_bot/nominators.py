@@ -105,7 +105,7 @@ def get_nominator_details(substrate, nom, all_nominators, validators_info, era_i
                     if status == "Active":
                         staking_nominators = validators_info[validator]["era_info"][era_index]["nominators"]
                         nominated[validator]["era_info"][era_index]["status"] = status
-                        prct_pos = get_pos_percentile(list(staking_nominators.values()), currently_staking)
+                        prct_pos = get_pos_percentile(list(staking_nominators.values()), currently_bonded)
                         nominated[validator]["era_info"][era_index]["nom_pos"] = prct_pos["value_pos"]
                         nominated[validator]["era_info"][era_index]["nom_percentile"] = prct_pos["percentile_rounded"]
                         nominated[validator]["era_info"][era_index]["len_nominators"] = prct_pos["len_list"]
