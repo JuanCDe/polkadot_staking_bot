@@ -20,6 +20,7 @@ import math
 def get_pos_percentile(val_list, value):
     if value not in val_list:
         val_list = list(val_list + [value])
+        # print(val_list)
     val_list.sort(reverse=True)
     len_list = len(val_list)
     value_pos = val_list.index(value) + 1
@@ -106,9 +107,9 @@ def generate_legend():
           f'❌ NOT VALIDATING> The validator has NO intentions to validate for this era\n\n' \
           f'\U0001F9FE: x.x% represents the fee from the validator. _(x.x% -> y.y%)_ would represent a fee change\n\n' \
           f'\U0001F5F3: Number of nominators nominating it / Number of nominators with it as the Active validator\n\n' \
-          f'\U00002696: The validator is oversuscribed (+256 nominators have it as their Active validator)\n\n' \
+          f'\U00002696: The validator is oversuscribed (+512 nominators have it as their Active validator)\n\n' \
           f'"\U0001F4CA": The % of the total amount staked on the validator owned by the nominator' \
-          f'❗: The nominator is (or would be) out of the top 256 of the nominating list\n\n' \
+          f'❗: The nominator is (or would be) out of the top 512 of the nominating list\n\n' \
           f'\U0001F3C5: Position of the nominator in the validator list (the "would-be" position if the validator is not the Active)\n\n' \
           f'_top x.x%_: Percentage from the top (percentile)\n\n' \
           f'\U0001F60A \U0001F600 \U0001F642 \U0001F928 \U0001F626 \U0001F6A8: The happier, the better position\n\n' \

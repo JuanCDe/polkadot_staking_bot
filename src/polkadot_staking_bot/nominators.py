@@ -186,10 +186,10 @@ def get_nominating_summary(substrate, nominator_details, era_index, nom):
                         perc_on_active_val_msg = f'{" "*8}\U0001F4CA{perc_on_active_val}%\n'
                     else:
                         perc_on_active_val_msg = ""
-                    active_nominators_w_emoji = f'{active_nominators} \U00002696' if active_nominators > 256 else active_nominators
+                    active_nominators_w_emoji = f'{active_nominators} \U00002696' if active_nominators > 512 else active_nominators
                     nom_percentile = info_current_era["nom_percentile"]
                     nom_position = info_current_era["nom_pos"]
-                    emoji_oversubs = "" if nom_position <= 256 else f'\U00002757'
+                    emoji_oversubs = "" if nom_position <= 512 else f'\U00002757'
                     emoji_pos = add_emoji_position(nom_percentile)
                     nom_pos_per = f'{" "*8}\U0001F5F3{total_nominators} / {active_nominators_w_emoji}\n' \
                                   f'{" "*8}\U0001F3C5{nom_position}º{emoji_oversubs} top {nom_percentile}% {emoji_pos}\n' \
